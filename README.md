@@ -1,1 +1,249 @@
-# FinWise
+# FinWise – Financial Intelligence through Language Models
+
+FinWise is an AI-powered personal finance system that tackles **two real-world problems** using modern NLP:
+
+1. A conversational **financial assistant** (LLM-powered chatbot)
+2. A **bank statement categorizer** that gives users clear insights into their spending
+
+It is deployed on the web (Vercel Cloud), with the chatbot custom finetuned LLM hosted on **RunPod** Custom Pod and the frontend on **Vercel** — fully accessible, functional, and battle-tested.
+
+---
+
+## Theme Justification: *Health, Wellness, and Fitness*
+
+> Because **financial health is health** — stress from poor money management is a leading wellness concern.
+
+We directly support this theme by:
+
+1. Educating users on **financial concepts** through Q&A chat
+2. Helping users **track and reflect on their spending habits**
+3. Offering **categorical spending breakdowns**
+4. Lowering barriers with **easy-to-use interfaces**
+5. Supporting future voice-first interactions for accessibility
+
+---
+
+## Project Requirements: How We Fully Address Them
+
+### 1. **Modeling Approaches**
+We evaluate three approaches for transaction categorization:
+
+| Approach | Description | Status |
+|----------|-------------|--------|
+| Naive | Keyword-based matching (e.g., "uber" → Transport) | Implemented |
+| Classical ML | TF-IDF + Random Forest, tuned with Optuna | Implemented (but not deployed) |
+| Deep Learning | Fine-tuned BERT | Fully trained + but not deployed |
+
+> We also explored zero-shot learning (BART) to test initial feasibility — further proving our effort went beyond the minimum.
+
+### 2. **Final Deliverables**
+
+| Deliverable | Status |
+|------------|--------|
+| Interactive app | Live at Vercel + RunPod |
+| Code repo with structure | [See below](#project-structure) |
+| Presentation video | Youtube Link |
+| Demo pitch (3 min) | In Class |
+| Ethics statement | Included in final slides & repo & wesbite |
+| Publicly accessible app | [https://finwise420.vercel.app/] |
+| GitHub repo link | [https://github.com/AkhilByteWrangler/FinWise] |
+
+### 3. **Why We Don't Use BERT / RF in Production**
+Although we trained a Random Forest and BERT model as part of our ML evaluation, they are not deployed because:
+
+- They require Python runtime and **don’t integrate cleanly with Next.js** (especially on Vercel).
+- The RF and BERT models are **larger and more costly to host**.
+- Our fine-tuned LLM is **faster, unified**, and performs better across both tasks.
+
+We include code and justification for this in the repo under `scripts/`.
+
+---
+
+## What We Built
+
+### Chatbot (Proprietary Knowledge Agent)
+- Hosted at: [RunPod URL](https://fpyen3pn2x83pb-8000.proxy.runpod.net/v1/chat/completions)
+- Accepts OpenAI-style `POST /v1/chat/completions` requests
+- Prompted with Alpaca-style instructions
+- Trained using the [FiQA dataset](https://huggingface.co/datasets/LLukas22/fiqa)
+
+### How to Use the Chatbot (RunPod API)
+
+Our Mistral-based model is hosted on RunPod and can be queried directly using `curl`:
+
+### Example `curl` Command
+
+```bash
+curl -X POST https://fpyen3pn2x83pb-8000.proxy.runpod.net/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "fiqa-mistral-7b-lora",
+    "messages": [
+      { "role": "user", "content": "Can you explain how a treasury bond works?" }
+    ],
+    "temperature": 0.7,
+    "max_tokens": 256
+  }'
+```
+
+Example Response :
+
+```bash
+{
+  "id": "chatcmpl-001",
+  "object": "chat.completion",
+  "model": "fiqa-mistral-7b-lora",
+  "choices": [{
+    "index": 0,
+    "message": {
+      "role": "assistant",
+      "content": "Of course, I'd be happy to help! A Treasury bond..."
+    },
+    "finish_reason": "stop"
+  }]
+}
+```
+
+### Statement Categorizer
+- Upload a CSV file with bank transactions
+- Map fields: `Date`, `Description`, `Amount`
+- Choose between:
+  - **Free (Naive)**: Based on keyword rules
+  - **Pro (LLM)**: Sent to our fine-tuned model
+- Shows **category breakdown + visualization**
+
+---
+
+## Why the Multi-Step Modeling Pipeline?
+
+We wanted to follow an iterative, evidence-based approach to modeling:
+
+1. **Zero-Shot (BART)** – to test label coverage and feasibility without training
+2. **Naive** – super fast, rule-based categorization for free tier
+3. **Random Forest** – strong classical ML baseline with explainability
+4. **BERT** – robust pretrained model, but costly to host
+5. **Fine-tuned Mistral** – best tradeoff between quality, cost, and flexibility — this is what powers both our chatbot and our pro categorizer
+
+---
+
+## Datasets Used
+
+- **Transaction Categorization**:
+  - [ApoorvWatsky/bank-transaction-data](https://www.kaggle.com/datasets/apoorvwatsky/bank-transaction-data)
+  - Used to generate our naive rules and supervised labels
+
+- **LLM Fine-Tuning**:
+  - [LLukas22/fiqa](https://huggingface.co/datasets/LLukas22/fiqa)
+  - Financial QA data used for conversational tuning of the Mistral model
+
+---
+
+## Deployed System Overview
+
+| Component | Tech Stack | Hosting |
+|----------|------------|---------|
+| Frontend | Next.js + TailwindCSS | Vercel |
+| Backend (LLM) | FastAPI + Unsloth | RunPod |
+| Storage | In-browser + memory | N/A (stateless) for privacy :) |
+
+> The frontend was partially generated using LLMs with the prompt:  
+> “Given these files of HTML, CSS, and starter NextJS, give me a good website skin.”
+
+---
+
+## Project Structure 
+
+```bash
+FinWise/
+├── app/                                # Next.js App Directory
+│   ├── api/                            # API Routes (Edge Functions)
+│   │   ├── categorize/route.ts         # POST /api/categorize → categorization logic
+│   │   ├── chat/route.ts               # POST /api/chat → chatbot relay to RunPod
+│   │   └── process-statement/route.ts  # POST /api/process-statement → parses CSV
+│   ├── statement-analysis/             # UI route for statement upload & view
+│   │   └── page.tsx
+│   ├── globals.css                     # Global styles
+│   ├── layout.tsx                      # Layout wrapper for all pages
+│   └── page.tsx                        # Root (chat) page
+│
+├── components/
+│   ├── statement-analysis/             # Modular components for CSV workflow
+│   │   ├── column-mapper.tsx
+│   │   ├── file-uploader.tsx
+│   │   ├── statement-analysis-page.tsx
+│   │   └── transaction-table.tsx
+│   └── ui/
+│       ├── chat-interface.tsx          # Chat UI component
+│       └── theme-provider.tsx          # Theme management for dark/light
+│
+├── deploy_finetuned_mistral/           # RunPod-hosted LLM server
+│   ├── finetune-sloth-mistral.py       # Script to fine-tune Mistral with Unsloth
+│   └── runpod_main.py                  # FastAPI app for /v1/chat/completions
+│
+├── hooks/
+│   ├── use-mobile.tsx                  # Custom hook for mobile screen detection
+│   └── use-toast.ts                    # Toast alert logic
+│
+├── lib/
+│   └── utils.ts                        # Shared utilities
+│
+├── public/                             # Static assets for frontend
+│   ├── placeholder-logo.png/svg
+│   ├── placeholder-user.jpg
+│   └── placeholder.jpg/svg
+│
+├── python/                             # (Optional/legacy) Python support if needed
+├── scripts/
+│   └── categorize.py                   # Naive categorizer + rule definition
+│
+├── styles/
+│   └── globals.css                     # Tailwind + custom styling
+
+# Root configs and metadata
+├── components.json                     # AI-generated UI layout schema (optional)
+├── LICENSE
+├── next.config.mjs
+├── package.json
+├── pnpm-lock.yaml
+├── postcss.config.mjs
+├── README.md
+├── requirements.txt                   # Python deps (RunPod)
+├── tailwind.config.ts
+└── tsconfig.json
+
+```
+
+---
+## Ethics Statement
+
+- No personal data is stored or tracked by FinWise
+- The chatbot does not log queries or responses
+- We recommend users **do not upload sensitive information** — anonymize CSVs if needed
+- All model outputs are **informational, not financial advice**
+
+---
+
+## Future Work
+
+- **Voice call interface** with ElevenLabs conversational agent
+- More advanced analytics: monthly trends, saving insights, goals
+- Integration with real bank APIs (e.g. Plaid) for live syncing
+- Memory + conversation context support
+- Pro account + authentication layer
+
+---
+
+## Final Demo (Link)
+
+> Available on YouTube
+
+---
+
+## Questions?
+
+Please email before grading :)
+
+---
+
+Built with care by the FinWise team (That's Only Me) 
+
