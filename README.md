@@ -1,5 +1,9 @@
 # FinWise – Financial Intelligence through Language Models
 
+[YouTube](https://youtu.be/45Ml2Kxd6RE?si=joz-5LR34-V0tpCs)
+
+[finwise420 Demo](https://finwise420.vercel.app/)
+
 FinWise is an AI-powered personal finance system that tackles **two real-world problems** using modern NLP:
 
 1. A conversational **financial assistant** (Custom Finetuned LLM-powered chatbot)
@@ -45,7 +49,7 @@ We fine-tuned a Mistral Llama 3.1 B model using LoRA on a publicly available fin
 |------------|--------|
 | Interactive app | Live at Vercel + RunPod |
 | Code repo with structure | [See below](#project-structure) |
-| Presentation video | Youtube Link |
+| Presentation video | [YouTube](https://youtu.be/45Ml2Kxd6RE?si=joz-5LR34-V0tpCs) |
 | Demo pitch (3 min) | In Class |
 | Ethics statement | Included in final slides & [repo](#Ethics-Statement) & wesbite |
 | Publicly accessible app | [finwise420](https://finwise420.vercel.app/) |
@@ -439,7 +443,7 @@ Building FinWise was both technically challenging and deeply rewarding. It pushe
 
 ## Final Demo (Link)
 
-> Available on YouTube
+> Available on [YouTube](https://youtu.be/45Ml2Kxd6RE?si=joz-5LR34-V0tpCs)
 
 ---
 
