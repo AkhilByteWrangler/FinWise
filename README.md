@@ -224,7 +224,7 @@ We combine these into a unified, accessible product that goes beyond prior effor
 | Backend (LLM) | FastAPI + Unsloth | RunPod |
 | Storage | In-browser + memory | N/A (stateless) for privacy :) |
 
-> The frontend was partially generated using LLMs with the prompt:  
+> The frontend was partially generated using V0 by Vercel LLM with the prompt:  
 > “Given these files of HTML, CSS, and starter NextJS, give me a good website skin.”
 
 ---
