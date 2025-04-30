@@ -447,11 +447,5 @@ Building FinWise was both technically challenging and deeply rewarding. It pushe
 
 ---
 
-## Questions?
-
-Please email before grading :)
-
----
-
 Built with care by the FinWise team (That's Only Me) 
 
